@@ -5,11 +5,13 @@
 // @description  Enterprise-grade remote JS loader with retry logic, fallback, and monitoring
 // @author       Engineering Team
 // @match        *://our-internal-tools.com/*
-// @connect      raw.githubusercontent.com
+// @connect      digisoftworks.ma
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @run-at       document-start
+// @updateURL    https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/refs/heads/main/loader.js
+// @downloadURL  https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/refs/heads/main/loader.js
 // ==/UserScript==
 
 /* jshint esversion: 8 */
