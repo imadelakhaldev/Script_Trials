@@ -5,7 +5,7 @@
 // @description  Enterprise-grade remote JS loader with retry logic, fallback, and monitoring
 // @author       Engineering Team
 // @match        *://our-internal-tools.com/*
-// @connect      digisoftworks.ma
+// @connect      raw.githubusercontent.com
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -25,7 +25,7 @@
 
     // ==================== CONFIGURATION ====================
     const CONFIG = {
-        primaryUrl: 'https://digisoftworks.ma/tampermonkey/script.js',
+        primaryUrl: 'https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/refs/heads/main/scripts/sample.js',
         fallbackUrl: null, // Optional: 'https://backup-server.com/script.js'
         maxRetries: 3,
         retryDelay: 2000, // milliseconds
