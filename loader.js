@@ -4,8 +4,8 @@
 // @version      3.0
 // @description  Enterprise-grade remote JS loader with retry logic, fallback, and monitoring
 // @author       Engineering Team
-// @match        *://our-internal-tools.com/*
-// @connect      digisoftworks.ma
+// @match        *
+// @connect      raw.githubusercontent.com
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
