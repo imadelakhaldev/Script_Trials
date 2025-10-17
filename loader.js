@@ -5,13 +5,13 @@
 // @description  Always loads latest remote script from GitHub (no caching ever)
 // @author       Engineering Team
 // @match        *://*/*
-// @connect      raw.githubusercontent.com
+// @connect      raw.githack.com
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @run-at       document-start
-// @downloadURL  https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/refs/heads/main/loader-nocache.js
-// @updateURL    https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/refs/heads/main/loader-nocache.js
+// @downloadURL  https://raw.githack.com/imadelakhaldev/TamperMonkey-Scripts/main/loader.js
+// @updateURL    https://raw.githack.com/imadelakhaldev/TamperMonkey-Scripts/main/loader.js
 // ==/UserScript==
 
 (function () {
@@ -21,7 +21,7 @@
 
   const CONFIG = {
     primaryUrl:
-      'https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/refs/heads/main/scripts/sample.js',
+      'https://raw.githack.com/imadelakhaldev/TamperMonkey-Scripts/main/scripts/sample.js',
     fallbackUrl: null,
     maxRetries: 3,
     retryDelay: 2000,
