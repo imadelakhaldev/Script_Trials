@@ -7,6 +7,7 @@
 // @match        *://*/*
 // @connect      raw.githubusercontent.com
 // @connect      cdn.jsdelivr.net
+// @connect      api.github.com
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -28,9 +29,11 @@
 
     // ==================== CONFIGURATION ====================
     const CONFIG = {
-        // Using jsDelivr CDN - bypasses GitHub's aggressive caching
-        primaryUrl: 'https://cdn.jsdelivr.net/gh/imadelakhaldev/TamperMonkey-Scripts@main/scripts/sample.js',
-        fallbackUrl: 'https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/refs/heads/main/scripts/sample.js', // GitHub as fallback
+        // Using GitHub API to get latest commit hash, then fetch from jsDelivr
+        // This ensures we always get the latest version without manual URL changes
+        githubApiUrl: 'https://api.github.com/repos/imadelakhaldev/TamperMonkey-Scripts/commits/main',
+        scriptPath: 'scripts/sample.js',
+        githubRawFallback: 'https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/main/scripts/sample.js',
         maxRetries: 3,
         retryDelay: 2000, // milliseconds
         timeout: 10000, // 10 seconds
@@ -139,6 +142,41 @@
 
     // ==================== SCRIPT FETCHING ====================
     
+    function getLatestCommitHash() {
+        return new Promise((resolve, reject) => {
+            log('Fetching latest commit hash from GitHub API...');
+            
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: CONFIG.githubApiUrl,
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json'
+                },
+                timeout: 5000,
+                onload: function(response) {
+                    try {
+                        if (response.status === 200) {
+                            const data = JSON.parse(response.responseText);
+                            const commitHash = data.sha;
+                            log('Latest commit hash retrieved', { hash: commitHash.substring(0, 7) });
+                            resolve(commitHash);
+                        } else {
+                            reject(new Error(`GitHub API returned ${response.status}`));
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                },
+                onerror: function(response) {
+                    reject(new Error('Failed to fetch commit hash'));
+                },
+                ontimeout: function() {
+                    reject(new Error('GitHub API timeout'));
+                }
+            });
+        });
+    }
+    
     function fetchRemoteScript(url, attempt = 1) {
         return new Promise((resolve, reject) => {
             const cacheBustedUrl = getCacheBustedUrl(url);
@@ -223,27 +261,33 @@
         log('Initializing Remote Script Loader...');
         
         let scriptContent = null;
+        let scriptUrl = null;
         
-        // Try to fetch from primary URL
+        // Try to get the latest commit hash and build URL
         try {
-            scriptContent = await fetchWithRetry(CONFIG.primaryUrl);
+            const commitHash = await getLatestCommitHash();
+            // Use commit hash in jsDelivr URL - this bypasses all caching
+            scriptUrl = `https://cdn.jsdelivr.net/gh/imadelakhaldev/TamperMonkey-Scripts@${commitHash}/${CONFIG.scriptPath}`;
+            log('Built jsDelivr URL with commit hash', { url: scriptUrl });
+        } catch (error) {
+            logError('Failed to get commit hash, using fallback URL', error);
+            scriptUrl = CONFIG.githubRawFallback;
+        }
+        
+        // Try to fetch the script
+        try {
+            scriptContent = await fetchWithRetry(scriptUrl);
         } catch (primaryError) {
             logError('Failed to fetch from primary URL', primaryError);
             
-            // Try fallback URL if configured
-            if (CONFIG.fallbackUrl) {
+            // Try fallback URL
+            if (scriptUrl !== CONFIG.githubRawFallback) {
                 log('Attempting fallback URL...');
                 try {
-                    scriptContent = await fetchWithRetry(CONFIG.fallbackUrl);
+                    scriptContent = await fetchWithRetry(CONFIG.githubRawFallback);
                 } catch (fallbackError) {
                     logError('Failed to fetch from fallback URL', fallbackError);
                 }
-            }
-            
-            // Try local cache as last resort
-            if (!scriptContent) {
-                log('Attempting to use local cache...');
-                scriptContent = getLocalCache();
             }
         }
         
