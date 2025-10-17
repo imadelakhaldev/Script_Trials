@@ -1,7 +1,7 @@
 /**
  * Remote Script for TamperMonkey Loader
  * File: script.js
- * URL: https://digisoftworks.ma/tampermonkey/script.js
+ * URL: https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/refs/heads/main/scripts/sample.js
  * 
  * This script is designed to be persistent and work on Single Page Applications (SPAs).
  * It uses MutationObserver to detect DOM changes and apply modifications dynamically.
@@ -13,7 +13,7 @@
     // ==================== CONFIGURATION ====================
     const SCRIPT_CONFIG = {
         scriptName: 'Remote Script',
-        version: '1.0.1',
+        version: '1.0.2',
         debugMode: true,
         observerDebounce: 100, // milliseconds to debounce observer callback
         maxProcessingTime: 50 // max ms to spend processing per mutation batch
