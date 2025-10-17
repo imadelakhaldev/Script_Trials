@@ -1,7 +1,7 @@
 /**
  * Remote Script for TamperMonkey Loader
  * File: script.js
- * URL: https://raw.githack.com/imadelakhaldev/TamperMonkey-Scripts/main/scripts/sample.js
+ * URL: https://cdn.jsdelivr.net/gh/imadelakhaldev/TamperMonkey-Scripts/scripts/sample.js
  * 
  * This script is designed to be persistent and work on Single Page Applications (SPAs).
  * It uses MutationObserver to detect DOM changes and apply modifications dynamically.

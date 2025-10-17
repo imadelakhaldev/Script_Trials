@@ -5,13 +5,13 @@
 // @description  Always loads the newest version of remote script via GitHack (no cache ever)
 // @author       Engineering Team
 // @match        *://*/*
-// @connect      raw.githack.com
+// @connect      cdn.jsdelivr.net
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @run-at       document-start
-// @downloadURL  https://raw.githack.com/imadelakhaldev/TamperMonkey-Scripts/main/loader.js
-// @updateURL    https://raw.githack.com/imadelakhaldev/TamperMonkey-Scripts/main/loader.js
+// @downloadURL  https://cdn.jsdelivr.net/gh/imadelakhaldev/TamperMonkey-Scripts/loader.js
+// @updateURL    https://cdn.jsdelivr.net/gh/imadelakhaldev/TamperMonkey-Scripts/loader.js
 // ==/UserScript==
 
 (function () {
@@ -20,7 +20,7 @@
   if (window.top !== window.self) return; // skip if inside iframe
 
   const CONFIG = {
-    primaryUrl: 'https://raw.githack.com/imadelakhaldev/TamperMonkey-Scripts/main/scripts/sample.js',
+    primaryUrl: 'https://cdn.jsdelivr.net/gh/imadelakhaldev/TamperMonkey-Scripts/scripts/sample.js',
     fallbackUrl: null,
     maxRetries: 3,
     retryDelay: 2000,
