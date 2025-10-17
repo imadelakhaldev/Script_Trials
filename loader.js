@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Remote Script Loader (No Cache Edition)
+// @name         Remote Script Loader (GitHack No-Cache Edition)
 // @namespace    http://tampermonkey.net/
-// @version      3.2
-// @description  Always loads latest remote script from GitHub (no caching ever)
+// @version      3.3
+// @description  Always loads the newest version of remote script via GitHack (no cache ever)
 // @author       Engineering Team
 // @match        *://*/*
 // @connect      raw.githack.com
@@ -17,11 +17,10 @@
 (function () {
   'use strict';
 
-  if (window.top !== window.self) return;
+  if (window.top !== window.self) return; // skip if inside iframe
 
   const CONFIG = {
-    primaryUrl:
-      'https://raw.githack.com/imadelakhaldev/TamperMonkey-Scripts/main/scripts/sample.js',
+    primaryUrl: 'https://raw.githack.com/imadelakhaldev/TamperMonkey-Scripts/main/scripts/sample.js',
     fallbackUrl: null,
     maxRetries: 3,
     retryDelay: 2000,
@@ -30,22 +29,21 @@
     healthCheckEnabled: true
   };
 
+  // --- Logging utilities ---
   function log(msg, data = null) {
-    if (CONFIG.debugMode)
-      console.log(`[TM Loader ${new Date().toISOString()}] ${msg}`, data || '');
+    if (CONFIG.debugMode) console.log(`[TM Loader ${new Date().toISOString()}] ${msg}`, data || '');
   }
-
   function logError(msg, err = null) {
     console.error(`[TM Loader ${new Date().toISOString()}] ERROR: ${msg}`, err || '');
   }
 
-  // Always append unique cache-busting query to URLs
+  // --- Cache-busting URL ---
   function getCacheBustedUrl(url) {
     const sep = url.includes('?') ? '&' : '?';
-    return `${url}${sep}_=${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    return `${url}${sep}_nocache=${Date.now()}_${Math.random().toString(36).substring(2)}`;
   }
 
-  // Inject remote script content into the page
+  // --- Inject script into page ---
   function injectScript(content) {
     return new Promise((resolve, reject) => {
       try {
@@ -55,6 +53,7 @@
         script.src = url;
         script.onload = () => {
           URL.revokeObjectURL(url);
+          log('Script injected successfully');
           resolve();
         };
         script.onerror = e => {
@@ -62,13 +61,13 @@
           reject(e);
         };
         (document.head || document.documentElement).appendChild(script);
-      } catch (e) {
-        reject(e);
+      } catch (err) {
+        reject(err);
       }
     });
   }
 
-  // Fetch remote script without using any cache
+  // --- Fetch remote script (no cache) ---
   function fetchRemoteScript(url, attempt = 1) {
     return new Promise((resolve, reject) => {
       const targetUrl = getCacheBustedUrl(url);
@@ -88,16 +87,16 @@
         },
         onload: res => {
           clearTimeout(timeoutId);
-          if (res.status >= 200 && res.status < 400 && res.responseText.trim().length) {
-            log('Remote script fetched successfully', { size: res.responseText.length });
+          if (res.status >= 200 && res.status < 400 && res.responseText.trim()) {
+            log(`Fetched ${res.responseText.length} bytes`);
             resolve(res.responseText);
           } else {
             reject(new Error(`HTTP ${res.status}: ${res.statusText}`));
           }
         },
-        onerror: err => {
+        onerror: e => {
           clearTimeout(timeoutId);
-          reject(new Error(`Network error: ${err.error || 'Unknown'}`));
+          reject(new Error(`Network error: ${e.error || 'Unknown'}`));
         },
         ontimeout: () => {
           clearTimeout(timeoutId);
@@ -107,6 +106,7 @@
     });
   }
 
+  // --- Retry logic ---
   async function fetchWithRetry(url, attempt = 1) {
     try {
       return await fetchRemoteScript(url, attempt);
@@ -120,8 +120,9 @@
     }
   }
 
+  // --- Main loader ---
   async function initialize() {
-    log('Initializing Remote Script Loader (No Cache)...');
+    log('Initializing GitHack No-Cache Loader...');
     let scriptContent = null;
 
     try {
@@ -140,17 +141,18 @@
     if (scriptContent) {
       try {
         await injectScript(scriptContent);
-        log('Script loaded successfully');
+        log('Remote script loaded successfully');
         if (CONFIG.healthCheckEnabled) GM_setValue('last_success', Date.now());
       } catch (injectErr) {
-        logError('Injection failed', injectErr);
+        logError('Failed to inject script', injectErr);
       }
     } else {
-      logError('CRITICAL: No script content loaded');
+      logError('No valid script content loaded');
       if (CONFIG.healthCheckEnabled) GM_setValue('last_failure', Date.now());
     }
   }
 
+  // --- Optional: expose loader health info ---
   if (CONFIG.healthCheckEnabled) {
     window.addEventListener('load', () => {
       const lastSuccess = GM_getValue('last_success');
@@ -167,5 +169,5 @@
     });
   }
 
-  initialize().catch(e => logError('Unhandled error', e));
+  initialize().catch(e => logError('Unhandled loader error', e));
 })();
