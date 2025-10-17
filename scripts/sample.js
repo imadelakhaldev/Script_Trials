@@ -60,7 +60,7 @@
             name: 'Welcome Alert',
             runOnce: true, // Only run once per session
             execute: () => {
-                alert('Welcome to our internal tools!');
+                alert('Welcome to our internal tools! Version: ' + SCRIPT_CONFIG.version);
                 log('Welcome alert displayed');
                 return true;
             }
