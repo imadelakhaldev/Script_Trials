@@ -13,7 +13,7 @@
     // ==================== CONFIGURATION ====================
     const SCRIPT_CONFIG = {
         scriptName: 'Remote Script',
-        version: '1.0.0',
+        version: '1.0.1',
         debugMode: true,
         observerDebounce: 100, // milliseconds to debounce observer callback
         maxProcessingTime: 50 // max ms to spend processing per mutation batch
@@ -72,10 +72,8 @@
             runOnce: true,
             execute: () => {
                 document.addEventListener('click', (e) => {
-                    if (e.target.matches('.track-click')) {
-                        log('Tracked click', { element: e.target.className });
-                        // Send analytics, etc.
-                    }
+                    log('Tracked click', { element: e.target.className });
+                    // Send analytics, etc.
                 });
                 log('Global click tracker initialized');
                 return true;
