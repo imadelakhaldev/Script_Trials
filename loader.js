@@ -1,13 +1,12 @@
 // ==UserScript==
-// @name         Remote Script Loader (GitHub Edition)
+// @name         Remote Script Controller (GitHub)
 // @namespace    http://tampermonkey.net/
-// @version      3.1
-// @description  Enterprise-grade remote JS loader from GitHub with retry logic, fallback, and monitoring
-// @author       Engineering Team
+// @version      3.0
+// @description  Remote JS Controller from GitHub with Retry, Fallback, and Monitoring Mechanisms
+// @author       AfroSpy
 // @match        *://*/*
-// @connect      raw.githubusercontent.com
-// @connect      cdn.jsdelivr.net
 // @connect      api.github.com
+// @connect      raw.githubusercontent.com
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -34,9 +33,9 @@
         githubApiUrl: 'https://api.github.com/repos/imadelakhaldev/TamperMonkey-Scripts/commits/main',
         scriptPath: 'scripts/sample.js',
         githubRawFallback: 'https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/main/scripts/sample.js',
-        maxRetries: 3,
-        retryDelay: 2000, // milliseconds
-        timeout: 10000, // 10 seconds
+        maxRetries: 6,
+        retryDelay: 3000, // milliseconds
+        timeout: 12000, // 12 seconds
         cacheBustingEnabled: true,
         enableLocalCache: false, // Set to true to cache script locally for offline scenarios
         cacheExpiration: 3600000, // 1 hour in milliseconds
