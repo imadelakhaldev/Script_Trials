@@ -1,17 +1,17 @@
 // ==UserScript==
-// @name         Remote Script Loader (Enhanced Enterprise Edition)
+// @name         Remote Script Loader (GitHub Edition)
 // @namespace    http://tampermonkey.net/
-// @version      3.0
-// @description  Enterprise-grade remote JS loader with retry logic, fallback, and monitoring
+// @version      3.1
+// @description  Enterprise-grade remote JS loader from GitHub with retry logic, fallback, and monitoring
 // @author       Engineering Team
-// @match        *
+// @match        *://*/*
 // @connect      raw.githubusercontent.com
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @run-at       document-start
-// @updateURL    https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/refs/heads/main/loader.js
 // @downloadURL  https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/refs/heads/main/loader.js
+// @updateURL    https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/refs/heads/main/loader.js
 // ==/UserScript==
 
 /* jshint esversion: 8 */
@@ -28,7 +28,7 @@
     // ==================== CONFIGURATION ====================
     const CONFIG = {
         primaryUrl: 'https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/refs/heads/main/scripts/sample.js',
-        fallbackUrl: null, // Optional: 'https://backup-server.com/script.js'
+        fallbackUrl: null, // Optional: Add a backup GitHub raw URL or different branch
         maxRetries: 3,
         retryDelay: 2000, // milliseconds
         timeout: 10000, // 10 seconds
