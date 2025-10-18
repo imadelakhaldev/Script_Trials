@@ -1,19 +1,18 @@
 // ==UserScript==
 // @name         Remote Script Controller (GitHub)
 // @namespace    http://tampermonkey.net/
-// @version      3.0
+// @version      4.0
 // @description  Remote JS Controller from GitHub with Retry, Fallback, and Monitoring Mechanisms
 // @author       AfroSpy
 // @match        *://*/*
 // @connect      api.github.com
 // @connect      raw.githubusercontent.com
-// @connect      cdn.jsdelivr.net
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @run-at       document-start
-// @downloadURL  https://raw.githubusercontent.com/imadelakhaldev/Script_Trials/refs/heads/main/TamperMonkey/loader.js
-// @updateURL    https://raw.githubusercontent.com/imadelakhaldev/Script_Trials/refs/heads/main/TamperMonkey/loader.js
+// @downloadURL  https://raw.githubusercontent.com/imadelakhaldev/Script_Trials/refs/heads/main/TamperMonkey/script.js
+// @updateURL    https://raw.githubusercontent.com/imadelakhaldev/Script_Trials/refs/heads/main/TamperMonkey/script.js
 // ==/UserScript==
 
 /* jshint esversion: 8 */
@@ -23,219 +22,123 @@
 
     // Prevent script from running in iframes
     if (window.top !== window.self) {
-        console.log('TM Loader: Skipping iframe execution');
         return;
     }
 
     // ==================== CONFIGURATION ====================
     const CONFIG = {
-        // Using GitHub API to get latest commit hash, then fetch from jsDelivr
-        // This ensures we always get the latest version without manual URL changes
-        githubApiUrl: 'https://api.github.com/repos/imadelakhaldev/Script_Trials/commits/main',
+        repo: 'imadelakhaldev/Script_Trials',
+        branch: 'main',
         scriptPath: 'TamperMonkey/script.js',
-        githubRawFallback: 'https://raw.githubusercontent.com/imadelakhaldev/Script_Trials/refs/heads/main/TamperMonkey/script.js',
+        debugMode: true,
         maxRetries: 6,
-        retryDelay: 3000, // milliseconds
-        timeout: 12000, // 12 seconds
-        cacheBustingEnabled: true,
-        enableLocalCache: false, // Set to true to cache script locally for offline scenarios
-        cacheExpiration: 3600000, // 1 hour in milliseconds
-        healthCheckEnabled: true,
-        debugMode: true // Set to false in production
+        retryDelay: 3000,
+        timeout: 18000
     };
 
-    // ==================== UTILITY FUNCTIONS ====================
+    // ==================== LOGGING ====================
     
     function log(message, data = null) {
-        if (CONFIG.debugMode) {
-            const timestamp = new Date().toISOString();
-            console.log(`[TM Loader ${timestamp}] ${message}`, data || '');
-        }
+        if (!CONFIG.debugMode) return;
+        console.log(`[TM Loader] ${message}`, data || '');
     }
 
     function logError(message, error = null) {
-        const timestamp = new Date().toISOString();
-        console.error(`[TM Loader ${timestamp}] ERROR: ${message}`, error || '');
+        console.error(`[TM Loader] ERROR: ${message}`, error || '');
     }
 
-    function getCacheBustedUrl(url) {
-        if (!CONFIG.cacheBustingEnabled) return url;
-        const separator = url.includes('?') ? '&' : '?';
-        return `${url}${separator}t=${Date.now()}&r=${Math.random().toString(36).substring(7)}`;
-    }
-
-    function getLocalCache() {
-        if (!CONFIG.enableLocalCache) return null;
-        try {
-            const cached = GM_getValue('remote_script_cache');
-            if (cached) {
-                const { content, timestamp } = JSON.parse(cached);
-                if (Date.now() - timestamp < CONFIG.cacheExpiration) {
-                    log('Using cached script');
-                    return content;
-                }
-            }
-        } catch (e) {
-            logError('Failed to read local cache', e);
-        }
-        return null;
-    }
-
-    function setLocalCache(content) {
-        if (!CONFIG.enableLocalCache) return;
-        try {
-            GM_setValue('remote_script_cache', JSON.stringify({
-                content,
-                timestamp: Date.now()
-            }));
-            log('Script cached locally');
-        } catch (e) {
-            logError('Failed to cache script', e);
-        }
-    }
-
-    // ==================== SCRIPT INJECTION ====================
-    
-    function injectScript(scriptContent) {
-        return new Promise((resolve, reject) => {
-            try {
-                log('Injecting script via Blob URL...');
-                
-                // Create blob with script content
-                const scriptBlob = new Blob([scriptContent], { type: 'text/javascript' });
-                const blobUrl = URL.createObjectURL(scriptBlob);
-                
-                // Create script element
-                const script = document.createElement('script');
-                script.type = 'text/javascript';
-                script.src = blobUrl;
-                
-                // Handle successful load
-                script.onload = () => {
-                    URL.revokeObjectURL(blobUrl);
-                    log('Script injected and blob URL revoked successfully');
-                    resolve();
-                };
-                
-                // Handle errors
-                script.onerror = (error) => {
-                    URL.revokeObjectURL(blobUrl);
-                    logError('Script injection failed', error);
-                    reject(new Error('Script injection failed'));
-                };
-                
-                // Inject into page
-                const target = document.head || document.documentElement;
-                if (!target) {
-                    reject(new Error('No valid injection target found'));
-                    return;
-                }
-                
-                target.appendChild(script);
-                
-            } catch (error) {
-                logError('Exception during script injection', error);
-                reject(error);
-            }
-        });
-    }
-
-    // ==================== SCRIPT FETCHING ====================
+    // ==================== GITHUB API ====================
     
     function getLatestCommitHash() {
         return new Promise((resolve, reject) => {
-            log('Fetching latest commit hash from GitHub API...');
+            const apiUrl = `https://api.github.com/repos/${CONFIG.repo}/commits/${CONFIG.branch}`;
+            log('Fetching latest commit hash...');
+            
+            const timeoutId = setTimeout(() => {
+                reject(new Error('GitHub API timeout'));
+            }, CONFIG.timeout);
             
             GM_xmlhttpRequest({
                 method: 'GET',
-                url: CONFIG.githubApiUrl,
+                url: apiUrl,
                 headers: {
-                    'Accept': 'application/vnd.github.v3+json'
+                    'Accept': 'application/vnd.github.v3+json',
+                    'User-Agent': 'TamperMonkey-Script-Loader'
                 },
-                timeout: 5000,
                 onload: function(response) {
-                    try {
-                        if (response.status === 200) {
+                    clearTimeout(timeoutId);
+                    
+                    if (response.status === 200) {
+                        try {
                             const data = JSON.parse(response.responseText);
-                            const commitHash = data.sha;
-                            log('Latest commit hash retrieved', { hash: commitHash.substring(0, 7) });
-                            resolve(commitHash);
-                        } else {
-                            reject(new Error(`GitHub API returned ${response.status}`));
+                            const hash = data.sha;
+                            log(`Latest commit: ${hash.substring(0, 7)}`);
+                            resolve(hash);
+                        } catch (error) {
+                            reject(new Error('Failed to parse GitHub API response'));
                         }
-                    } catch (error) {
-                        reject(error);
+                    } else if (response.status === 403) {
+                        // Rate limited - use cached hash
+                        logError('GitHub API rate limited, using cached commit');
+                        const cached = GM_getValue('last_commit_hash');
+                        if (cached) {
+                            resolve(cached);
+                        } else {
+                            reject(new Error('Rate limited and no cache available'));
+                        }
+                    } else {
+                        reject(new Error(`GitHub API error: ${response.status}`));
                     }
                 },
-                onerror: function(response) {
-                    reject(new Error('Failed to fetch commit hash'));
+                onerror: function() {
+                    clearTimeout(timeoutId);
+                    reject(new Error('GitHub API network error'));
                 },
                 ontimeout: function() {
+                    clearTimeout(timeoutId);
                     reject(new Error('GitHub API timeout'));
                 }
             });
         });
     }
+
+    // ==================== SCRIPT FETCHING ====================
     
-    function fetchRemoteScript(url, attempt = 1) {
+    function fetchScript(url, attempt = 1) {
         return new Promise((resolve, reject) => {
-            const cacheBustedUrl = getCacheBustedUrl(url);
-            
-            log(`Fetching remote script (attempt ${attempt}/${CONFIG.maxRetries})`, { url: cacheBustedUrl });
+            log(`Fetching script (attempt ${attempt}/${CONFIG.maxRetries})`);
             
             const timeoutId = setTimeout(() => {
-                logError('Request timed out', { url: cacheBustedUrl, timeout: CONFIG.timeout });
-                reject(new Error(`Request timeout after ${CONFIG.timeout}ms`));
+                reject(new Error('Request timeout'));
             }, CONFIG.timeout);
             
             GM_xmlhttpRequest({
                 method: 'GET',
-                url: cacheBustedUrl,
+                url: url,
                 headers: {
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
+                    'Cache-Control': 'no-cache'
                 },
                 onload: function(response) {
                     clearTimeout(timeoutId);
                     
                     if (response.status >= 200 && response.status < 400) {
-                        log('Remote script fetched successfully', { 
-                            status: response.status,
-                            size: response.responseText.length 
-                        });
-                        
-                        // Basic validation
                         if (!response.responseText || response.responseText.trim().length === 0) {
                             reject(new Error('Empty response received'));
                             return;
                         }
                         
-                        // Cache the script
-                        setLocalCache(response.responseText);
-                        
+                        log(`Script fetched successfully (${response.responseText.length} bytes)`);
                         resolve(response.responseText);
                     } else {
-                        logError('HTTP error', {
-                            status: response.status,
-                            statusText: response.statusText,
-                            url: cacheBustedUrl
-                        });
-                        reject(new Error(`HTTP ${response.status}: ${response.statusText}`));
+                        reject(new Error(`HTTP ${response.status}`));
                     }
                 },
                 onerror: function(response) {
                     clearTimeout(timeoutId);
-                    logError('Network error', {
-                        error: response.error,
-                        details: response.details,
-                        url: cacheBustedUrl
-                    });
                     reject(new Error(`Network error: ${response.error || 'Unknown'}`));
                 },
                 ontimeout: function() {
                     clearTimeout(timeoutId);
-                    logError('Request timeout');
                     reject(new Error('Request timeout'));
                 }
             });
@@ -244,7 +147,7 @@
 
     async function fetchWithRetry(url, attempt = 1) {
         try {
-            return await fetchRemoteScript(url, attempt);
+            return await fetchScript(url, attempt);
         } catch (error) {
             if (attempt < CONFIG.maxRetries) {
                 log(`Retrying in ${CONFIG.retryDelay}ms...`);
@@ -255,86 +158,101 @@
         }
     }
 
-    // ==================== MAIN EXECUTION ====================
+    // ==================== SCRIPT INJECTION ====================
+    
+    function injectScript(scriptContent) {
+        return new Promise((resolve, reject) => {
+            try {
+                log('Injecting script...');
+                
+                const blob = new Blob([scriptContent], { type: 'text/javascript' });
+                const blobUrl = URL.createObjectURL(blob);
+                
+                const script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.src = blobUrl;
+                
+                script.onload = () => {
+                    URL.revokeObjectURL(blobUrl);
+                    log('Script injected successfully');
+                    resolve();
+                };
+                
+                script.onerror = () => {
+                    URL.revokeObjectURL(blobUrl);
+                    reject(new Error('Script injection failed'));
+                };
+                
+                (document.head || document.documentElement).appendChild(script);
+                
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    // ==================== MAIN LOGIC ====================
     
     async function initialize() {
-        log('Initializing Remote Script Loader...');
+        log('Starting loader...');
         
-        let scriptContent = null;
-        let scriptUrl = null;
-        
-        // Try to get the latest commit hash and build URL
         try {
+            // Get latest commit hash
             const commitHash = await getLatestCommitHash();
-            // Use commit hash in jsDelivr URL - this bypasses all caching
-            scriptUrl = `https://cdn.jsdelivr.net/gh/imadelakhaldev/Script_Trials@${commitHash}/${CONFIG.scriptPath}`;
-            log('Built jsDelivr URL with commit hash', { url: scriptUrl });
+            
+            // Cache the commit hash for rate limit scenarios
+            GM_setValue('last_commit_hash', commitHash);
+            
+            // Build URL with commit hash (bypasses all caching)
+            const scriptUrl = `https://raw.githubusercontent.com/${CONFIG.repo}/${commitHash}/${CONFIG.scriptPath}`;
+            log(`Script URL: ${scriptUrl}`);
+            
+            // Fetch script
+            const scriptContent = await fetchWithRetry(scriptUrl);
+            
+            // Inject script
+            await injectScript(scriptContent);
+            
+            log('✓ Loader completed successfully');
+            GM_setValue('last_success', Date.now());
+            
         } catch (error) {
-            logError('Failed to get commit hash, using fallback URL', error);
-            scriptUrl = CONFIG.githubRawFallback;
-        }
-        
-        // Try to fetch the script
-        try {
-            scriptContent = await fetchWithRetry(scriptUrl);
-        } catch (primaryError) {
-            logError('Failed to fetch from primary URL', primaryError);
+            logError('Loader failed', error);
+            GM_setValue('last_failure', Date.now());
             
-            // Try fallback URL
-            if (scriptUrl !== CONFIG.githubRawFallback) {
-                log('Attempting fallback URL...');
-                try {
-                    scriptContent = await fetchWithRetry(CONFIG.githubRawFallback);
-                } catch (fallbackError) {
-                    logError('Failed to fetch from fallback URL', fallbackError);
-                }
-            }
-        }
-        
-        // Inject script if we have content
-        if (scriptContent) {
+            // Try branch-based URL as last resort
             try {
+                log('Attempting fallback with branch name...');
+                const fallbackUrl = `https://raw.githubusercontent.com/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.scriptPath}`;
+                const scriptContent = await fetchWithRetry(fallbackUrl);
                 await injectScript(scriptContent);
-                log('Remote script loader completed successfully');
-                
-                // Store success metric
-                if (CONFIG.healthCheckEnabled) {
-                    GM_setValue('last_success', Date.now());
-                }
-            } catch (injectionError) {
-                logError('Failed to inject script', injectionError);
-            }
-        } else {
-            logError('CRITICAL: No script content available from any source');
-            
-            // Store failure metric
-            if (CONFIG.healthCheckEnabled) {
-                GM_setValue('last_failure', Date.now());
+                log('✓ Loaded via fallback');
+            } catch (fallbackError) {
+                logError('Fallback failed', fallbackError);
             }
         }
     }
 
     // ==================== HEALTH CHECK ====================
     
-    if (CONFIG.healthCheckEnabled) {
-        // Expose health status to page context for monitoring
-        window.addEventListener('load', () => {
-            const lastSuccess = GM_getValue('last_success');
-            const lastFailure = GM_getValue('last_failure');
-            
-            window.__TM_LOADER_HEALTH__ = {
-                lastSuccess: lastSuccess ? new Date(lastSuccess).toISOString() : null,
-                lastFailure: lastFailure ? new Date(lastFailure).toISOString() : null,
-                status: lastSuccess && (!lastFailure || lastSuccess > lastFailure) ? 'healthy' : 'degraded'
-            };
-            
-            log('Health status exposed', window.__TM_LOADER_HEALTH__);
-        });
-    }
-
-    // Start the loader
-    initialize().catch(error => {
-        logError('Unhandled error in initialize()', error);
+    window.addEventListener('load', () => {
+        const lastSuccess = GM_getValue('last_success');
+        const lastFailure = GM_getValue('last_failure');
+        const lastCommit = GM_getValue('last_commit_hash');
+        
+        window.__TM_LOADER_STATUS__ = {
+            lastSuccess: lastSuccess ? new Date(lastSuccess).toISOString() : null,
+            lastFailure: lastFailure ? new Date(lastFailure).toISOString() : null,
+            lastCommit: lastCommit ? lastCommit.substring(0, 7) : null,
+            healthy: lastSuccess && (!lastFailure || lastSuccess > lastFailure)
+        };
+        
+        if (CONFIG.debugMode) {
+            log('Status:', window.__TM_LOADER_STATUS__);
+        }
     });
+
+    // Start
+    initialize();
 
 })();
