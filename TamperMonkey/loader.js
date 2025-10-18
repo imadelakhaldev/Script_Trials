@@ -7,6 +7,7 @@
 // @match        *://*/*
 // @connect      api.github.com
 // @connect      raw.githubusercontent.com
+// @connect      cdn.jsdelivr.net
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
