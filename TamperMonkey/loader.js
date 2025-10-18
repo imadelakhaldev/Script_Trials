@@ -267,7 +267,7 @@
         try {
             const commitHash = await getLatestCommitHash();
             // Use commit hash in jsDelivr URL - this bypasses all caching
-            scriptUrl = `https://cdn.jsdelivr.net/gh/imadelakhaldev/TamperMonkey-Scripts@${commitHash}/${CONFIG.scriptPath}`;
+            scriptUrl = `https://cdn.jsdelivr.net/gh/imadelakhaldev/Script_Trials@${commitHash}/${CONFIG.scriptPath}`;
             log('Built jsDelivr URL with commit hash', { url: scriptUrl });
         } catch (error) {
             logError('Failed to get commit hash, using fallback URL', error);

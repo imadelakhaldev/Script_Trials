@@ -1,0 +1,19 @@
+1- Download & Install TemperMonkey Extension:
+https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo
+
+2- Activate Extension Developer Options:
+chrome://extensions/
+
+3- Allow Required Settings for TemperMonkey:
+chrome://extensions/?id=dhdgffkkebhmkfjojejmpbldmpobfkfo
+
+* Site Access = All Sites
+* Allow User Scripts = True
+* Pin to Toolbar = False
+* Allow in Incognito = True
+* Allow File Access = True
+
+4- Install Remote Controller JS Script:
+chrome-extension://dhdgffkkebhmkfjojejmpbldmpobfkfo/options.html#nav=utils
+
+* Import from URL = https://raw.githubusercontent.com/imadelakhaldev/Script_Trials/refs/heads/main/TamperMonkey/loader.js
