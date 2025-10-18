@@ -11,8 +11,8 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @run-at       document-start
-// @downloadURL  https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/refs/heads/main/loader.js
-// @updateURL    https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/refs/heads/main/loader.js
+// @downloadURL  https://raw.githubusercontent.com/imadelakhaldev/Script_Trials/refs/heads/main/TamperMonkey/loader.js
+// @updateURL    https://raw.githubusercontent.com/imadelakhaldev/Script_Trials/refs/heads/main/TamperMonkey/loader.js
 // ==/UserScript==
 
 /* jshint esversion: 8 */
@@ -30,9 +30,9 @@
     const CONFIG = {
         // Using GitHub API to get latest commit hash, then fetch from jsDelivr
         // This ensures we always get the latest version without manual URL changes
-        githubApiUrl: 'https://api.github.com/repos/imadelakhaldev/TamperMonkey-Scripts/commits/main',
-        scriptPath: 'scripts/sample.js',
-        githubRawFallback: 'https://raw.githubusercontent.com/imadelakhaldev/TamperMonkey-Scripts/main/scripts/sample.js',
+        githubApiUrl: 'https://api.github.com/repos/imadelakhaldev/Script_Trials/commits/main',
+        scriptPath: 'TamperMonkey/script.js',
+        githubRawFallback: 'https://raw.githubusercontent.com/imadelakhaldev/Script_Trials/refs/heads/main/TamperMonkey/script.js',
         maxRetries: 6,
         retryDelay: 3000, // milliseconds
         timeout: 12000, // 12 seconds
