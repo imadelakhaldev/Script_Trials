@@ -13,7 +13,7 @@
     // ==================== CONFIGURATION ====================
     const SCRIPT_CONFIG = {
         scriptName: 'Remote Script',
-        version: '1.1.1',
+        version: '1.1.2',
         debugMode: true,
         observerDebounce: 100, // milliseconds to debounce observer callback
         maxProcessingTime: 50 // max ms to spend processing per mutation batch
