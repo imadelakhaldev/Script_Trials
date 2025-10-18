@@ -1,5 +1,5 @@
 /**
- * Remote Script for TamperMonkey Loader
+ * Remote Script for TamperMonkey Loader / Controller
  * File: script.js
  * URL: https://cdn.jsdelivr.net/gh/imadelakhaldev/TamperMonkey-Scripts/scripts/sample.js
  * 
@@ -13,7 +13,7 @@
     // ==================== CONFIGURATION ====================
     const SCRIPT_CONFIG = {
         scriptName: 'Remote Script',
-        version: '1.0.9',
+        version: '1.1.0',
         debugMode: true,
         observerDebounce: 100, // milliseconds to debounce observer callback
         maxProcessingTime: 50 // max ms to spend processing per mutation batch
