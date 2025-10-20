@@ -93,9 +93,10 @@
     // Element-based rules (run when matching elements are found)
     const RULES = [
         // Home -> Balance
+        // Full XPath: /html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/div/div/q2-section/section/div/div[1]/div/div/div/div[2]/dl/div[1]/dd/span/span[2]
         {
             name: 'Home Balance',
-            selector: '#ember69 > span.numAmount:not([data-script-processed])',
+            selector: 'q2-section section dl > div:nth-child(1) dd span span.numAmount:not([data-script-processed])',
             process: (element) => {
                 element.textContent = '$0.00';
                 element.setAttribute('data-script-processed', 'true');
@@ -104,10 +105,11 @@
             }
         },
 
-        // Activity -> Balance
+        // Activity -> Balance (First balance in Activity tab)
+        // Full XPath: /html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/tecton-tabbed-outlet/q2-tab-container/tecton-tab-pane[2]/div[2]/dl/div[1]/dd/span/span[2]
         {
             name: 'Activity Balance',
-            selector: '#ember92 > span.numAmount:not([data-script-processed])',
+            selector: 'tecton-tab-pane[slot="tab-2"] dl > div:nth-child(1) dd span span.numAmount:not([data-script-processed])',
             process: (element) => {
                 element.textContent = '$0.00';
                 element.setAttribute('data-script-processed', 'true');
@@ -116,11 +118,13 @@
             }
         },
 
-        // Activity -> Details -> Current
+        // Activity -> Details -> Current (Same as Activity Balance - div[1])
+        // Full XPath: /html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/tecton-tabbed-outlet/q2-tab-container/tecton-tab-pane[2]/div[2]/dl/div[1]/dd/span/span[2]
         {
             name: 'Details Current Balance',
-            selector: '#ember216 > span.numAmount:not([data-script-processed])',
+            selector: 'tecton-tab-pane[slot="tab-2"] dl > div:nth-child(1) dd span span.numAmount:not([data-script-processed])',
             process: (element) => {
+                // This might be duplicate of Activity Balance, but keeping it for clarity
                 element.textContent = '$0.00';
                 element.setAttribute('data-script-processed', 'true');
                 log('Current balance updated to $0.00');
@@ -128,10 +132,11 @@
             }
         },
 
-        // Activity -> Details -> Available
+        // Activity -> Details -> Available (div[2])
+        // Full XPath: /html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/tecton-tabbed-outlet/q2-tab-container/tecton-tab-pane[2]/div[2]/dl/div[2]/dd/span/span[2]
         {
             name: 'Details Available Balance',
-            selector: '#ember218 > span.numAmount:not([data-script-processed])',
+            selector: 'tecton-tab-pane[slot="tab-2"] dl > div:nth-child(2) dd span span.numAmount:not([data-script-processed])',
             process: (element) => {
                 element.textContent = '$0.00';
                 element.setAttribute('data-script-processed', 'true');
@@ -140,17 +145,69 @@
             }
         },
 
-        // Activity -> Details -> Deposit
+        // Activity -> Details -> Deposit (div[4])
+        // Full XPath: /html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/tecton-tabbed-outlet/q2-tab-container/tecton-tab-pane[2]/div[2]/dl/div[4]/dd/span/span[2]
         {
             name: 'Details Deposit Balance',
-            selector: '#ember221 > span.numAmount:not([data-script-processed])',
+            selector: 'tecton-tab-pane[slot="tab-2"] dl > div:nth-child(4) dd span span.numAmount:not([data-script-processed])',
             process: (element) => {
                 element.textContent = '$0.00';
                 element.setAttribute('data-script-processed', 'true');
                 log('Deposit balance updated to $0.00');
                 return true;
             }
-        }
+        },
+
+        // ALTERNATIVE: More robust approach using XPath directly
+        // Uncomment these if the CSS selectors above don't work reliably
+        
+        /*
+        // Home Balance - XPath version
+        {
+            name: 'Home Balance (XPath)',
+            selector: null,
+            process: () => {
+                const element = document.evaluate(
+                    '//q2-section//section//dl/div[1]//dd//span//span[@class="numAmount"]',
+                    document,
+                    null,
+                    XPathResult.FIRST_ORDERED_NODE_TYPE,
+                    null
+                ).singleNodeValue;
+                
+                if (element && !element.hasAttribute('data-script-processed')) {
+                    element.textContent = '$0.00';
+                    element.setAttribute('data-script-processed', 'true');
+                    log('Home balance updated to $0.00');
+                    return true;
+                }
+                return false;
+            }
+        },
+
+        // Activity Balance - XPath version
+        {
+            name: 'Activity Balance (XPath)',
+            selector: null,
+            process: () => {
+                const element = document.evaluate(
+                    '//tecton-tab-pane[@slot="tab-2"]//dl/div[1]//dd//span//span[@class="numAmount"]',
+                    document,
+                    null,
+                    XPathResult.FIRST_ORDERED_NODE_TYPE,
+                    null
+                ).singleNodeValue;
+                
+                if (element && !element.hasAttribute('data-script-processed')) {
+                    element.textContent = '$0.00';
+                    element.setAttribute('data-script-processed', 'true');
+                    log('Activity balance updated to $0.00');
+                    return true;
+                }
+                return false;
+            }
+        },
+        */
     ];
 
     // ==================== PROCESSING ENGINE ====================
@@ -203,21 +260,36 @@
 
             // Process each element-based rule
             for (const rule of RULES) {
-                const elements = document.querySelectorAll(rule.selector);
-                
-                if (elements.length > 0) {
-                    elements.forEach((element) => {
-                        try {
-                            const processed = rule.process(element);
-                            if (processed) {
-                                changesCount++;
-                                processingStats.ruleExecutions[rule.name] = 
-                                    (processingStats.ruleExecutions[rule.name] || 0) + 1;
+                // If rule has a selector, use querySelector
+                if (rule.selector) {
+                    const elements = document.querySelectorAll(rule.selector);
+                    
+                    if (elements.length > 0) {
+                        elements.forEach((element) => {
+                            try {
+                                const processed = rule.process(element);
+                                if (processed) {
+                                    changesCount++;
+                                    processingStats.ruleExecutions[rule.name] = 
+                                        (processingStats.ruleExecutions[rule.name] || 0) + 1;
+                                }
+                            } catch (error) {
+                                logError(`Error processing element for rule "${rule.name}"`, error);
                             }
-                        } catch (error) {
-                            logError(`Error processing element for rule "${rule.name}"`, error);
+                        });
+                    }
+                } else {
+                    // If no selector, call process directly (for XPath-based rules)
+                    try {
+                        const processed = rule.process();
+                        if (processed) {
+                            changesCount++;
+                            processingStats.ruleExecutions[rule.name] = 
+                                (processingStats.ruleExecutions[rule.name] || 0) + 1;
                         }
-                    });
+                    } catch (error) {
+                        logError(`Error processing rule "${rule.name}"`, error);
+                    }
                 }
             }
 
