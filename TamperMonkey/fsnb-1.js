@@ -78,7 +78,7 @@
     <div class="row-content flex">
         <div class="col-date uppercase" aria-label="Date: Oct 19 2025">Oct 19 2025</div>
         <div class="col-desc col-desc-no-pfm">
-            <div test-id="historyItemDescription" class="description-text two-lines" aria-label="Description: International Wire Transfer ">International Wire Transfer</div>
+            <div test-id="historyItemDescription" class="description-text two-lines" aria-label="Description: International Wire Transfer ">International Wire Transfer (Pending)</div>
         </div>
         <div class="col-amount">
             <span test-id="lblAmount" id="ember102" class="amount debit ui-number ui-currency currency currency-commercial currency-transaction currency-negative ember-view">
@@ -118,6 +118,18 @@
                 element.textContent = '$17,845,951,000.00';
                 element.setAttribute('data-script-processed', 'true');
                 log('Home balance updated to $17,845,951,000.00');
+                return true;
+            }
+        },
+        {
+            name: 'Activity Title',
+            // Activity -> Title Full
+            xpath: '/html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/div[2]/dl/div/dt',
+            process: (element) => {
+                if (!element || element.hasAttribute('data-script-processed')) return false;
+                element.textContent = 'Pending Balance';
+                element.setAttribute('data-script-processed', 'true');
+                log('Activity title updated to Pending Balance');
                 return true;
             }
         },
