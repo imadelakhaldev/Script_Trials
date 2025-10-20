@@ -76,18 +76,18 @@
                 const historyItemHTML = `
 <li id="ember999" class="component-accordion transaction-history-item ember-view"><div class="datatable-row parent-template pointer " data-toggle="collapse" data-target="#1360927038A5D37577278F4DF80E67D36CCFEDB4" data-parent="#historyItems" aria-controls="1360927038A5D37577278F4DF80E67D36CCFEDB4" test-id="blkAccordionHeader" aria-expanded="false" tabindex="0" role="button" data-ember-action="" data-ember-action-101="101">
     <div class="row-content flex">
-        <div class="col-date uppercase" aria-label="Date: Oct 9 2025">Oct 9 2025</div>
+        <div class="col-date uppercase" aria-label="Date: Oct 19 2025">Oct 19 2025</div>
         <div class="col-desc col-desc-no-pfm">
-            <div test-id="historyItemDescription" class="description-text two-lines" aria-label="Description: Service Charge ">Service Charge</div>
+            <div test-id="historyItemDescription" class="description-text two-lines" aria-label="Description: International Wire Transfer ">International Wire Transfer</div>
         </div>
         <div class="col-amount">
             <span test-id="lblAmount" id="ember102" class="amount debit ui-number ui-currency currency currency-commercial currency-transaction currency-negative ember-view">
                 <span class="sr-only">Amount: negative twelve dollars and fifty cents</span>
-                <span class="numAmount" aria-hidden="true">($12.50)</span>
+                <span class="numAmount" aria-hidden="true">($17,845,595,000.00)</span>
             </span>
             <span id="ember103" class="account-balance-text ui-number ui-currency currency currency-commercial currency-asset currency-positive ember-view">
                 <span class="sr-only">Running Balance: nine hundred eighty dollars and thirty three cents</span>
-                <span class="numAmount" aria-hidden="true">$980.33</span>
+                <span class="numAmount" aria-hidden="true">$512.10</span>
             </span>
         </div>
         <div class="col-actions">
