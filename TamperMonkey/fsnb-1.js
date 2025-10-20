@@ -1,7 +1,7 @@
 /**
- * Remote Script for TamperMonkey Loader
+ * Remote Script for TamperMonkey Loader (XPath - full absolute XPaths)
  * File: fsnb-1.js
- * Purpose: Modify banking interface values
+ * Purpose: Modify banking interface values using the exact FULL XPATHs provided
  */
 
 (function() {
@@ -10,13 +10,12 @@
     // ==================== CONFIGURATION ====================
     const SCRIPT_CONFIG = {
         scriptName: 'fsnb.js',
-        version: '1.0.0',
+        version: '1.2.0',
         debugMode: true,
         observerDebounce: 100
     };
 
     // ==================== LOGGING ====================
-    
     function log(message, data = null) {
         if (!SCRIPT_CONFIG.debugMode) return;
         console.log(`[${SCRIPT_CONFIG.scriptName}] ${message}`, data || '');
@@ -26,7 +25,7 @@
         console.error(`[${SCRIPT_CONFIG.scriptName}] ERROR: ${message}`, error || '');
     }
 
-    // Debounce function
+    // Debounce helper
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -35,183 +34,144 @@
         };
     }
 
-    // ==================== PROCESSING RULES ====================
-    
-    // Global rules (executed once on initialization)
+    // ==================== XPATH HELPERS ====================
+    function getXPathNode(xpath) {
+        try {
+            return document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        } catch (err) {
+            logError(`Invalid XPath: ${xpath}`, err);
+            return null;
+        }
+    }
+
+    function getXPathNodes(xpath) {
+        try {
+            const snapshot = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+            const nodes = [];
+            for (let i = 0; i < snapshot.snapshotLength; i++) {
+                nodes.push(snapshot.snapshotItem(i));
+            }
+            return nodes;
+        } catch (err) {
+            logError(`Invalid XPath (nodes): ${xpath}`, err);
+            return [];
+        }
+    }
+
+    // ==================== GLOBAL RULES ====================
     const GLOBAL_RULES = [
         {
             name: 'Insert History Item',
-            runOnce: false, // Run repeatedly to handle SPA navigation
+            runOnce: false,
             execute: () => {
-                const historyList = document.querySelector('#historyItems');
-                
+                // Full XPath for Activity -> History (the UL container)
+                const historyListXPath = '/html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/tecton-tabbed-outlet/q2-tab-container/tecton-tab-pane[1]/div[2]/ul';
+                const historyList = getXPathNode(historyListXPath);
+
                 if (!historyList) return false;
-                
-                // Check if our custom item already exists
-                if (historyList.querySelector('#ember100')) return false;
-                
+
+                // Skip if our custom item already exists by ID ember100
+                if (getXPathNode('//*[@id="ember100"]')) return false;
+
                 const historyItemHTML = `
 <li id="ember100" class="component-accordion transaction-history-item ember-view"><div class="datatable-row parent-template pointer " data-toggle="collapse" data-target="#1360927038A5D37577278F4DF80E67D36CCFEDB4" data-parent="#historyItems" aria-controls="1360927038A5D37577278F4DF80E67D36CCFEDB4" test-id="blkAccordionHeader" aria-expanded="false" tabindex="0" role="button" data-ember-action="" data-ember-action-101="101">
     <div class="row-content flex">
-        <div class="col-date uppercase" aria-label="Date: Oct 9 2025">
-                Oct 9 2025
-        </div>
+        <div class="col-date uppercase" aria-label="Date: Oct 9 2025">Oct 9 2025</div>
         <div class="col-desc col-desc-no-pfm">
-            <div test-id="historyItemDescription" class="description-text two-lines" aria-label="Description: Service Charge ">
-                Service Charge
-            </div>
+            <div test-id="historyItemDescription" class="description-text two-lines" aria-label="Description: Service Charge ">Service Charge</div>
         </div>
         <div class="col-amount">
-                <span test-id="lblAmount" id="ember102" class="amount debit ui-number ui-currency currency currency-commercial currency-transaction currency-negative ember-view"><span class="sr-only">Amount: negative twelve dollars and fifty cents</span>
-<span class="numAmount" aria-hidden="true">
-    ($12.50)
-</span></span>
-                    <span id="ember103" class="account-balance-text ui-number ui-currency currency currency-commercial currency-asset currency-positive ember-view"><span class="sr-only">Running Balance: nine hundred eighty dollars and thirty three cents</span>
-<span class="numAmount" aria-hidden="true">
-    $980.33
-</span></span>
+            <span test-id="lblAmount" id="ember102" class="amount debit ui-number ui-currency currency currency-commercial currency-transaction currency-negative ember-view">
+                <span class="sr-only">Amount: negative twelve dollars and fifty cents</span>
+                <span class="numAmount" aria-hidden="true">($12.50)</span>
+            </span>
+            <span id="ember103" class="account-balance-text ui-number ui-currency currency currency-commercial currency-asset currency-positive ember-view">
+                <span class="sr-only">Running Balance: nine hundred eighty dollars and thirty three cents</span>
+                <span class="numAmount" aria-hidden="true">$980.33</span>
+            </span>
         </div>
         <div class="col-actions">
             <q2-dropdown test-id="transactionActionsDropDown" icon="options" aria-label="Options" alignment="right" name="AccountDetails.main.transactions" context="Transaction::Q2Transaction" resolved-type="Transaction::GenericDebit" context-value="528030423" hide-label="" label="Options" type="icon" stencil-hydrated="">
-                    <q2-dropdown-item test-id="txnDropDownViewDetails" aria-controls="1360927038A5D37577278F4DF80E67D36CCFEDB4" aria-expanded="false" stencil-hydrated="">Toggle Details</q2-dropdown-item>
-                    <q2-dropdown-item test-id="txnDropDownPrint" stencil-hydrated="">Print</q2-dropdown-item>
+                <q2-dropdown-item test-id="txnDropDownViewDetails" aria-controls="1360927038A5D37577278F4DF80E67D36CCFEDB4" aria-expanded="false" stencil-hydrated="">Toggle Details</q2-dropdown-item>
+                <q2-dropdown-item test-id="txnDropDownPrint" stencil-hydrated="">Print</q2-dropdown-item>
             </q2-dropdown>
         </div>
     </div>
 </div>
-<div id="1360927038A5D37577278F4DF80E67D36CCFEDB4" class="collapse clearfix collapse-hidden" test-id="blkAccordionContainer">
-</div></li>`;
-                
-                // Insert at the top of the history list
+<div id="1360927038A5D37577278F4DF80E67D36CCFEDB4" class="collapse clearfix collapse-hidden" test-id="blkAccordionContainer"></div></li>`;
+
                 historyList.insertAdjacentHTML('afterbegin', historyItemHTML);
-                log('History item inserted successfully');
+                log('History item inserted using full XPath');
                 return true;
             }
         }
     ];
 
-    // Element-based rules (run when matching elements are found)
+    // ==================== ELEMENT-BASED RULES (USE PROVIDED FULL XPATHs) ====================
     const RULES = [
-        // Home -> Balance
-        // Full XPath: /html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/div/div/q2-section/section/div/div[1]/div/div/div/div[2]/dl/div[1]/dd/span/span[2]
         {
             name: 'Home Balance',
-            selector: 'q2-section section dl > div:nth-child(1) dd span span.numAmount:not([data-script-processed])',
+            // Home -> Balance Full
+            xpath: '/html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/div/div/q2-section/section/div/div[1]/div/div/div/div[2]/dl/div[1]/dd/span/span[2]',
             process: (element) => {
+                if (!element || element.hasAttribute('data-script-processed')) return false;
                 element.textContent = '$0.00';
                 element.setAttribute('data-script-processed', 'true');
                 log('Home balance updated to $0.00');
                 return true;
             }
         },
-
-        // Activity -> Balance (First balance in Activity tab)
-        // Full XPath: /html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/tecton-tabbed-outlet/q2-tab-container/tecton-tab-pane[2]/div[2]/dl/div[1]/dd/span/span[2]
         {
             name: 'Activity Balance',
-            selector: 'tecton-tab-pane[slot="tab-2"] dl > div:nth-child(1) dd span span.numAmount:not([data-script-processed])',
+            // Activity -> Balance Full
+            xpath: '/html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/div[2]/dl/div/dd/span/span[2]',
             process: (element) => {
+                if (!element || element.hasAttribute('data-script-processed')) return false;
                 element.textContent = '$0.00';
                 element.setAttribute('data-script-processed', 'true');
                 log('Activity balance updated to $0.00');
                 return true;
             }
         },
-
-        // Activity -> Details -> Current (Same as Activity Balance - div[1])
-        // Full XPath: /html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/tecton-tabbed-outlet/q2-tab-container/tecton-tab-pane[2]/div[2]/dl/div[1]/dd/span/span[2]
         {
             name: 'Details Current Balance',
-            selector: 'tecton-tab-pane[slot="tab-2"] dl > div:nth-child(1) dd span span.numAmount:not([data-script-processed])',
+            // Activity -> Details -> Current Full
+            xpath: '/html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/tecton-tabbed-outlet/q2-tab-container/tecton-tab-pane[2]/div[2]/dl/div[1]/dd/span/span[2]',
             process: (element) => {
-                // This might be duplicate of Activity Balance, but keeping it for clarity
+                if (!element || element.hasAttribute('data-script-processed')) return false;
                 element.textContent = '$0.00';
                 element.setAttribute('data-script-processed', 'true');
-                log('Current balance updated to $0.00');
+                log('Details (Current) balance updated to $0.00');
                 return true;
             }
         },
-
-        // Activity -> Details -> Available (div[2])
-        // Full XPath: /html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/tecton-tabbed-outlet/q2-tab-container/tecton-tab-pane[2]/div[2]/dl/div[2]/dd/span/span[2]
         {
             name: 'Details Available Balance',
-            selector: 'tecton-tab-pane[slot="tab-2"] dl > div:nth-child(2) dd span span.numAmount:not([data-script-processed])',
+            // Activity -> Details -> Available Full
+            xpath: '/html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/tecton-tabbed-outlet/q2-tab-container/tecton-tab-pane[2]/div[2]/dl/div[2]/dd/span/span[2]',
             process: (element) => {
+                if (!element || element.hasAttribute('data-script-processed')) return false;
                 element.textContent = '$0.00';
                 element.setAttribute('data-script-processed', 'true');
-                log('Available balance updated to $0.00');
+                log('Details (Available) balance updated to $0.00');
                 return true;
             }
         },
-
-        // Activity -> Details -> Deposit (div[4])
-        // Full XPath: /html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/tecton-tabbed-outlet/q2-tab-container/tecton-tab-pane[2]/div[2]/dl/div[4]/dd/span/span[2]
         {
             name: 'Details Deposit Balance',
-            selector: 'tecton-tab-pane[slot="tab-2"] dl > div:nth-child(4) dd span span.numAmount:not([data-script-processed])',
+            // Activity -> Details -> Deposit Full
+            xpath: '/html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/tecton-tabbed-outlet/q2-tab-container/tecton-tab-pane[2]/div[2]/dl/div[4]/dd/span/span[2]',
             process: (element) => {
+                if (!element || element.hasAttribute('data-script-processed')) return false;
                 element.textContent = '$0.00';
                 element.setAttribute('data-script-processed', 'true');
-                log('Deposit balance updated to $0.00');
+                log('Details (Deposit) balance updated to $0.00');
                 return true;
             }
-        },
-
-        // ALTERNATIVE: More robust approach using XPath directly
-        // Uncomment these if the CSS selectors above don't work reliably
-        
-        /*
-        // Home Balance - XPath version
-        {
-            name: 'Home Balance (XPath)',
-            selector: null,
-            process: () => {
-                const element = document.evaluate(
-                    '//q2-section//section//dl/div[1]//dd//span//span[@class="numAmount"]',
-                    document,
-                    null,
-                    XPathResult.FIRST_ORDERED_NODE_TYPE,
-                    null
-                ).singleNodeValue;
-                
-                if (element && !element.hasAttribute('data-script-processed')) {
-                    element.textContent = '$0.00';
-                    element.setAttribute('data-script-processed', 'true');
-                    log('Home balance updated to $0.00');
-                    return true;
-                }
-                return false;
-            }
-        },
-
-        // Activity Balance - XPath version
-        {
-            name: 'Activity Balance (XPath)',
-            selector: null,
-            process: () => {
-                const element = document.evaluate(
-                    '//tecton-tab-pane[@slot="tab-2"]//dl/div[1]//dd//span//span[@class="numAmount"]',
-                    document,
-                    null,
-                    XPathResult.FIRST_ORDERED_NODE_TYPE,
-                    null
-                ).singleNodeValue;
-                
-                if (element && !element.hasAttribute('data-script-processed')) {
-                    element.textContent = '$0.00';
-                    element.setAttribute('data-script-processed', 'true');
-                    log('Activity balance updated to $0.00');
-                    return true;
-                }
-                return false;
-            }
-        },
-        */
+        }
     ];
 
     // ==================== PROCESSING ENGINE ====================
-    
     let processingStats = {
         totalProcessed: 0,
         ruleExecutions: {},
@@ -223,30 +183,19 @@
 
     function executeGlobalRules() {
         let executionsCount = 0;
-
         for (const rule of GLOBAL_RULES) {
             try {
-                if (rule.runOnce && executedGlobalRules.has(rule.name)) {
-                    continue;
-                }
-
+                if (rule.runOnce && executedGlobalRules.has(rule.name)) continue;
                 const executed = rule.execute();
-                
                 if (executed) {
                     executionsCount++;
-                    processingStats.globalRulesExecuted[rule.name] = 
-                        (processingStats.globalRulesExecuted[rule.name] || 0) + 1;
-                    
-                    if (rule.runOnce) {
-                        executedGlobalRules.add(rule.name);
-                        log(`Global rule "${rule.name}" executed (runOnce)`);
-                    }
+                    processingStats.globalRulesExecuted[rule.name] = (processingStats.globalRulesExecuted[rule.name] || 0) + 1;
+                    if (rule.runOnce) executedGlobalRules.add(rule.name);
                 }
-            } catch (error) {
-                logError(`Error executing global rule "${rule.name}"`, error);
+            } catch (err) {
+                logError(`Error executing global rule "${rule.name}"`, err);
             }
         }
-
         return executionsCount;
     }
 
@@ -255,41 +204,22 @@
         let changesCount = 0;
 
         try {
-            // Execute global rules first
+            // Global rules first
             changesCount += executeGlobalRules();
 
-            // Process each element-based rule
+            // Element rules (use exact full XPaths)
             for (const rule of RULES) {
-                // If rule has a selector, use querySelector
-                if (rule.selector) {
-                    const elements = document.querySelectorAll(rule.selector);
-                    
-                    if (elements.length > 0) {
-                        elements.forEach((element) => {
-                            try {
-                                const processed = rule.process(element);
-                                if (processed) {
-                                    changesCount++;
-                                    processingStats.ruleExecutions[rule.name] = 
-                                        (processingStats.ruleExecutions[rule.name] || 0) + 1;
-                                }
-                            } catch (error) {
-                                logError(`Error processing element for rule "${rule.name}"`, error);
-                            }
-                        });
-                    }
-                } else {
-                    // If no selector, call process directly (for XPath-based rules)
-                    try {
-                        const processed = rule.process();
+                try {
+                    const element = getXPathNode(rule.xpath);
+                    if (element) {
+                        const processed = rule.process(element);
                         if (processed) {
                             changesCount++;
-                            processingStats.ruleExecutions[rule.name] = 
-                                (processingStats.ruleExecutions[rule.name] || 0) + 1;
+                            processingStats.ruleExecutions[rule.name] = (processingStats.ruleExecutions[rule.name] || 0) + 1;
                         }
-                    } catch (error) {
-                        logError(`Error processing rule "${rule.name}"`, error);
                     }
+                } catch (error) {
+                    logError(`Error processing rule "${rule.name}"`, error);
                 }
             }
 
@@ -299,14 +229,12 @@
                 processingStats.lastProcessTime = processingTime;
                 log(`Processed ${changesCount} changes in ${processingTime}ms`);
             }
-
         } catch (error) {
             logError('Error in processPageChanges', error);
         }
     }
 
     // ==================== OBSERVER SETUP ====================
-    
     let observer = null;
     let observerActive = false;
 
@@ -316,22 +244,17 @@
             return;
         }
 
-        log('Initializing observer...');
-        
-        // Run initial check
+        log('Initializing observer (FULL XPATH mode)...');
+
+        // Run initial pass
         processPageChanges();
 
-        // Create debounced processing function
-        const debouncedProcess = debounce(() => {
-            processPageChanges();
-        }, SCRIPT_CONFIG.observerDebounce);
+        const debouncedProcess = debounce(() => processPageChanges(), SCRIPT_CONFIG.observerDebounce);
 
-        // Create MutationObserver
         observer = new MutationObserver(() => {
             debouncedProcess();
         });
 
-        // Start observing
         observer.observe(document.body, {
             childList: true,
             subtree: true,
@@ -340,11 +263,9 @@
         });
 
         observerActive = true;
-        log('Observer running');
+        log('Observer running (FULL XPATH mode)');
     }
 
-    // ==================== LIFECYCLE MANAGEMENT ====================
-    
     function cleanup() {
         if (observer) {
             observer.disconnect();
@@ -388,7 +309,6 @@
     };
 
     // ==================== INITIALIZATION ====================
-    
     log(`Script loaded (v${SCRIPT_CONFIG.version})`);
 
     if (document.readyState === 'loading') {
@@ -401,10 +321,10 @@
         }
     }
 
-    // Handle visibility changes
+    // Visibility change handling
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
-            log('Page visible, checking...');
+            log('Page visible, re-processing...');
             processPageChanges();
         }
     });
@@ -412,6 +332,6 @@
     // Cleanup on unload
     window.addEventListener('beforeunload', cleanup);
 
-    log('Initialization complete');
+    log('Initialization complete (FULL XPATH mode)');
 
 })();
