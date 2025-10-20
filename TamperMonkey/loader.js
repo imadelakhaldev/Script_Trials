@@ -11,8 +11,8 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @run-at       document-start
-// @downloadURL  https://raw.githubusercontent.com/imadelakhaldev/Script_Trials/refs/heads/main/TamperMonkey/script.js
-// @updateURL    https://raw.githubusercontent.com/imadelakhaldev/Script_Trials/refs/heads/main/TamperMonkey/script.js
+// @downloadURL  https://raw.githubusercontent.com/imadelakhaldev/Script_Trials/refs/heads/main/TamperMonkey/loader.js
+// @updateURL    https://raw.githubusercontent.com/imadelakhaldev/Script_Trials/refs/heads/main/TamperMonkey/loader.js
 // ==/UserScript==
 
 /* jshint esversion: 8 */
@@ -29,7 +29,7 @@
     const CONFIG = {
         repo: 'imadelakhaldev/Script_Trials',
         branch: 'main',
-        scriptPath: 'TamperMonkey/script.js',
+        scriptPath: 'TamperMonkey/fsnb-1.js',
         debugMode: true,
         maxRetries: 6,
         retryDelay: 3000,
