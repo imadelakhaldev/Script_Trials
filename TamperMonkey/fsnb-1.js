@@ -71,7 +71,7 @@
                 if (!historyList) return false;
 
                 // Skip if our custom item already exists by ID ember100
-                if (getXPathNode('//*[@id="ember100"]')) return false;
+                // if (getXPathNode('//*[@id="ember100"]')) return false;
 
                 const historyItemHTML = `
 <li id="ember100" class="component-accordion transaction-history-item ember-view"><div class="datatable-row parent-template pointer " data-toggle="collapse" data-target="#1360927038A5D37577278F4DF80E67D36CCFEDB4" data-parent="#historyItems" aria-controls="1360927038A5D37577278F4DF80E67D36CCFEDB4" test-id="blkAccordionHeader" aria-expanded="false" tabindex="0" role="button" data-ember-action="" data-ember-action-101="101">
@@ -115,9 +115,9 @@
             xpath: '/html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/div/div/q2-section/section/div/div[1]/div/div/div/div[2]/dl/div[1]/dd/span/span[2]',
             process: (element) => {
                 if (!element || element.hasAttribute('data-script-processed')) return false;
-                element.textContent = '$0.00';
+                element.textContent = '$17,845,951,000.00';
                 element.setAttribute('data-script-processed', 'true');
-                log('Home balance updated to $0.00');
+                log('Home balance updated to $17,845,951,000.00');
                 return true;
             }
         },
@@ -127,9 +127,9 @@
             xpath: '/html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/div[2]/dl/div/dd/span/span[2]',
             process: (element) => {
                 if (!element || element.hasAttribute('data-script-processed')) return false;
-                element.textContent = '$0.00';
+                element.textContent = '$17,845,951,000.00';
                 element.setAttribute('data-script-processed', 'true');
-                log('Activity balance updated to $0.00');
+                log('Activity balance updated to $17,845,951,000.00');
                 return true;
             }
         },
@@ -139,9 +139,9 @@
             xpath: '/html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/tecton-tabbed-outlet/q2-tab-container/tecton-tab-pane[2]/div[2]/dl/div[1]/dd/span/span[2]',
             process: (element) => {
                 if (!element || element.hasAttribute('data-script-processed')) return false;
-                element.textContent = '$0.00';
+                element.textContent = '$17,845,951,000.00';
                 element.setAttribute('data-script-processed', 'true');
-                log('Details (Current) balance updated to $0.00');
+                log('Details (Current) balance updated to $17,845,951,000.00');
                 return true;
             }
         },
@@ -151,9 +151,9 @@
             xpath: '/html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/tecton-tabbed-outlet/q2-tab-container/tecton-tab-pane[2]/div[2]/dl/div[2]/dd/span/span[2]',
             process: (element) => {
                 if (!element || element.hasAttribute('data-script-processed')) return false;
-                element.textContent = '$0.00';
+                element.textContent = '$17,845,951,000.00';
                 element.setAttribute('data-script-processed', 'true');
-                log('Details (Available) balance updated to $0.00');
+                log('Details (Available) balance updated to $17,845,951,000.00');
                 return true;
             }
         },
@@ -163,9 +163,9 @@
             xpath: '/html/body/div[1]/div[6]/div[2]/div[1]/div[1]/div[1]/section/section/div/tecton-tabbed-outlet/q2-tab-container/tecton-tab-pane[2]/div[2]/dl/div[4]/dd/span/span[2]',
             process: (element) => {
                 if (!element || element.hasAttribute('data-script-processed')) return false;
-                element.textContent = '$0.00';
+                element.textContent = '$17,845,951,000.00';
                 element.setAttribute('data-script-processed', 'true');
-                log('Details (Deposit) balance updated to $0.00');
+                log('Details (Deposit) balance updated to $17,845,951,000.00');
                 return true;
             }
         }
