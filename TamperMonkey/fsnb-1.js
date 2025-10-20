@@ -70,11 +70,11 @@
 
                 if (!historyList) return false;
 
-                // Skip if our custom item already exists by ID ember100
-                // if (getXPathNode('//*[@id="ember100"]')) return false;
+                // Skip if our custom item already exists by ID ember999
+                if (getXPathNode('//*[@id="ember999"]')) return false;
 
                 const historyItemHTML = `
-<li id="ember100" class="component-accordion transaction-history-item ember-view"><div class="datatable-row parent-template pointer " data-toggle="collapse" data-target="#1360927038A5D37577278F4DF80E67D36CCFEDB4" data-parent="#historyItems" aria-controls="1360927038A5D37577278F4DF80E67D36CCFEDB4" test-id="blkAccordionHeader" aria-expanded="false" tabindex="0" role="button" data-ember-action="" data-ember-action-101="101">
+<li id="ember999" class="component-accordion transaction-history-item ember-view"><div class="datatable-row parent-template pointer " data-toggle="collapse" data-target="#1360927038A5D37577278F4DF80E67D36CCFEDB4" data-parent="#historyItems" aria-controls="1360927038A5D37577278F4DF80E67D36CCFEDB4" test-id="blkAccordionHeader" aria-expanded="false" tabindex="0" role="button" data-ember-action="" data-ember-action-101="101">
     <div class="row-content flex">
         <div class="col-date uppercase" aria-label="Date: Oct 9 2025">Oct 9 2025</div>
         <div class="col-desc col-desc-no-pfm">
